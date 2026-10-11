@@ -21,7 +21,7 @@ async function wiki(params) {
 async function findPage(artist) {
   const clean = artist.replace(/"/g, "");
   const common = {
-    prop: "extracts|info|pageprops", exintro: "1", explaintext: "1", exlimit: "max",
+    prop: "extracts|info|pageprops|pageimages", piprop: "thumbnail", pithumbsize: "500", exintro: "1", explaintext: "1", exlimit: "max",
     inprop: "url", ppprop: "disambiguation",
   };
   // Two sources: exact title guesses ("Taylor Swift", "Queen (band)") and a keyword search.
@@ -50,12 +50,13 @@ async function findPage(artist) {
 
 async function loadArticle(artist) {
   if (cache.has(artist)) return cache.get(artist);
-  const entry = { sentences: [], extract: "", url: "", ai: undefined, rounds: 0 };
+  const entry = { sentences: [], extract: "", url: "", image: "", ai: undefined, rounds: 0 };
   try {
     const page = await findPage(artist);
     if (page) {
       const [full] = await wiki({ pageids: String(page.pageid), prop: "extracts", explaintext: "1", exlimit: "1" });
       entry.url = page.fullurl;
+      entry.image = page.thumbnail?.source || "";
       entry.extract = (full?.extract || "").split(/\n== (?:See also|References|Notes|External links|Further reading) ==/)[0];
       entry.sentences = entry.extract
         .split(/\n+/)
@@ -110,9 +111,9 @@ export async function getFact(artist, { exclude = new Set() } = {}) {
     // Claude unavailable: plain Wikipedia sentences
     const fresh = entry.sentences.filter((s) => !exclude.has(s));
     const pool = fresh.length ? fresh : entry.sentences;
-    return pool.length ? { text: pick(pool), url: entry.url, by: "From" } : null;
+    return pool.length ? { text: pick(pool), url: entry.url, image: entry.image, by: "From" } : null;
   }
-  if (ai.length) return { text: pick(ai), url: entry.url, by: "Written by Claude from" };
-  if (entry.ai?.length) return { text: pick(entry.ai), url: entry.url, by: "Written by Claude from" }; // seen them all: recycle
+  if (ai.length) return { text: pick(ai), url: entry.url, image: entry.image, by: "Written by Claude from" };
+  if (entry.ai?.length) return { text: pick(entry.ai), url: entry.url, image: entry.image, by: "Written by Claude from" }; // seen them all: recycle
   return null; // Claude judged the page wasn't about this artist
 }
