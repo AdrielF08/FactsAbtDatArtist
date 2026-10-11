@@ -4,33 +4,53 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FactsAbtDatArtist</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><text y=%27.9em%27 font-size=%2790%27>💿</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Shrikhand&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main id="app">
-    <section id="login" hidden>
-      <h1>FactsAbtDatArtist</h1>
-      <p>Connect your music and get a surprising fact about whoever is playing.</p>
-      <button id="connect">Connect Spotify</button>
-    </section>
+  <main class="stage">
 
-    <section id="player" hidden>
-      <p id="source" class="source"></p>
-      <h2 id="artist"></h2>
-      <p id="fact" class="fact" aria-live="polite"></p>
-      <p id="credit" class="credit"></p>
-      <div class="actions">
-        <button id="another">Another fact</button>
-        <button id="shuffle" class="ghost">Different artist</button>
-        <button id="follow" class="ghost" hidden>Follow what's playing</button>
-        <button id="logout" class="ghost">Disconnect</button>
+    <!-- The turntable -->
+    <div class="deck" aria-hidden="true">
+      <div class="platter">
+        <div class="record">
+          <div class="label">
+            <span>Side A</span>
+            <strong>Facts<br>Abt Dat<br>Artist</strong>
+            <span>33&#8531; RPM</span>
+          </div>
+        </div>
       </div>
-    </section>
+      <div class="tonearm"></div>
+    </div>
 
-    <p id="error" role="alert" hidden></p>
+    <!-- The record sleeve (all the app's content lives here) -->
+    <div class="sleeve" id="app">
+      <section id="login" hidden>
+        <h1>FactsAbtDatArtist</h1>
+        <p class="tagline">Plug in your Spotify. Every time the needle drops, get a fact about whoever's singing.</p>
+        <button id="connect">Connect Spotify</button>
+      </section>
+
+      <section id="player" hidden>
+        <p id="source" class="source"></p>
+        <h2 id="artist"></h2>
+        <p id="fact" class="fact" aria-live="polite"></p>
+        <p id="credit" class="credit"></p>
+        <div class="actions">
+          <button id="another">Another fact</button>
+          <button id="shuffle" class="ghost">Different artist</button>
+          <button id="follow" class="ghost" hidden>Follow what's playing</button>
+          <button id="logout" class="ghost">Disconnect</button>
+        </div>
+      </section>
+
+      <p id="error" role="alert" hidden></p>
+    </div>
+
   </main>
   <script type="module" src="src/main.js"></script>
 </body>
