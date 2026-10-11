@@ -11,13 +11,42 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- decorative background records -->
+  <div class="bg-records" aria-hidden="true">
+    <div class="bg-record" style="--s:230px;top:6%;left:-70px;--lbl:var(--mustard);--o:.55;--d:26s;--dir:normal"></div>
+    <div class="bg-record" style="--s:150px;top:12%;right:7%;--lbl:var(--note-teal);--o:.45;--d:18s;--dir:reverse"></div>
+    <div class="bg-record" style="--s:320px;bottom:-110px;left:10%;--lbl:var(--label);--o:.55;--d:32s;--dir:normal"></div>
+    <div class="bg-record" style="--s:130px;bottom:11%;right:-28px;--lbl:var(--cream);--o:.5;--d:20s;--dir:reverse"></div>
+    <div class="bg-record" style="--s:180px;top:48%;left:2%;--lbl:var(--note-teal);--o:.4;--d:24s;--dir:reverse"></div>
+    <div class="bg-record" style="--s:110px;top:3%;left:74%;--lbl:var(--label);--o:.4;--d:16s;--dir:normal"></div>
+    <div class="bg-record" style="--s:270px;top:-100px;right:-70px;--lbl:var(--mustard);--o:.5;--d:30s;--dir:reverse"></div>
+    <div class="bg-record" style="--s:100px;bottom:4%;left:50%;--lbl:var(--cream);--o:.4;--d:15s;--dir:normal"></div>
+    <div class="bg-record" style="--s:160px;top:60%;right:26%;--lbl:var(--label);--o:.35;--d:22s;--dir:normal"></div>
+  </div>
+
+  <header class="title">
+    <h1>FactsAbtDatArtist</h1>
+  </header>
+
   <main class="stage">
 
     <!-- The turntable -->
     <div class="deck" aria-hidden="true">
+      <!-- floating music notes -->
+      <span class="note" style="top:-9%;left:6%;font-size:2.2rem;--d:4.2s;--dl:-1s;--r:-10deg">♪</span>
+      <span class="note" style="top:-6%;left:46%;font-size:2rem;--d:5.1s;--dl:-3s;--r:8deg">♫</span>
+      <span class="note" style="top:-10%;right:10%;font-size:2.4rem;--d:3.8s;--dl:-2s;--r:-6deg">♬</span>
+      <span class="note" style="top:20%;left:-9%;font-size:2.1rem;--d:4.8s;--dl:-4s;--r:10deg">♩</span>
+      <span class="note" style="top:52%;left:-11%;font-size:1.8rem;--d:5.5s;--dl:-0.5s;--r:-12deg">♪</span>
+      <span class="note" style="bottom:6%;left:-8%;font-size:2.3rem;--d:4.4s;--dl:-2.5s;--r:7deg">♫</span>
+      <span class="note" style="bottom:-10%;left:30%;font-size:2rem;--d:5.2s;--dl:-3.5s;--r:-8deg">♬</span>
+      <span class="note" style="bottom:-9%;right:20%;font-size:2.2rem;--d:3.9s;--dl:-1.5s;--r:12deg">♪</span>
+      <span class="note" style="top:36%;right:-10%;font-size:2rem;--d:4.6s;--dl:-2.2s;--r:-9deg">♩</span>
+      <span class="note" style="bottom:20%;right:-9%;font-size:2.3rem;--d:5s;--dl:-0.8s;--r:6deg">♫</span>
       <div class="platter">
         <div class="record">
           <div class="label">
+            <img id="labelImg" alt="" hidden>
             <span>Side A</span>
             <strong>Facts<br>Abt Dat<br>Artist</strong>
             <span>33&#8531; RPM</span>
@@ -30,14 +59,15 @@
     <!-- The record sleeve (all the app's content lives here) -->
     <div class="sleeve" id="app">
       <section id="login" hidden>
-        <h1>FactsAbtDatArtist</h1>
-        <p class="tagline">Plug in your Spotify. Every time the needle drops, get a fact about whoever's singing.</p>
+        <p class="tagline">Plug in ur Spotify. Play the Music, and get a FactAbtDatArtist.</p>
         <button id="connect">Connect Spotify</button>
       </section>
 
       <section id="player" hidden>
+        <figure class="polaroid" id="photoWrap" hidden><img id="photo" alt="Photo of the artist"></figure>
         <p id="source" class="source"></p>
         <h2 id="artist"></h2>
+        <p id="album" class="album"></p>
         <p id="fact" class="fact" aria-live="polite"></p>
         <p id="credit" class="credit"></p>
         <div class="actions">

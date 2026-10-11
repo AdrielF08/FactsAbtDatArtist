@@ -36,14 +36,16 @@ PROMPT = """Below is Wikipedia text that should be about the music artist "{arti
 
 First check: if the text is NOT about this artist (it's a different person, an album, a song, a place, etc.), return [] and nothing else.
 
-Otherwise write 8 interesting, surprising facts about {artist} using ONLY information in the text.
+Otherwise write 6 detailed, genuinely interesting facts about {artist} using ONLY information in the text.
 Rules:
-- One sentence each, under 200 characters, conversational and specific (names, numbers, places).
-- Every fact must name or clearly be about {artist}. No generic music-history trivia.
-- No dull career-summary lines, no "is a band formed in...". Prefer odd details, firsts, records, stories.
-- Do not invent anything that isn't in the text.
+- Each fact is 2 to 3 sentences, up to about 450 characters.
+- Give the full context: who was involved (full names), what happened, when (year or date), where, and why it mattered or what came of it.
+- Be specific. Include names, numbers, dates, places, song/album titles and outcomes. Never be vague ("a famous producer", "later on", "a big hit"): say who, when, which.
+- Do not rely on pronouns or earlier context. Name {artist} in each fact so it stands on its own.
+- Skip dull career-summary lines. Prefer stories, firsts, records, collaborations, turning points and surprising details.
+- Do not invent or guess anything that isn't in the text.
 - Do not repeat or rephrase any of these already-used facts: {avoid}
-Return ONLY a JSON array of strings.
+Return ONLY a JSON array of 6 strings.
 
 TEXT:
 {extract}"""
@@ -94,7 +96,7 @@ class Handler(SimpleHTTPRequestHandler):
                     "model": MODEL,
                     "max_tokens": 4000,
                     "messages": [{"role": "user", "content": PROMPT.format(
-                        artist=body["artist"][:100], extract=body["extract"][:8000], avoid=avoid)}],
+                        artist=body["artist"][:100], extract=body["extract"][:12000], avoid=avoid)}],
                 }).encode(),
                 headers={"x-api-key": KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
             )
