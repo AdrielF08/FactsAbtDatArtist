@@ -12,11 +12,6 @@ const API = "https://api.spotify.com/v1";
 const SCOPES = "user-read-currently-playing user-top-read";
 const KEY = "spotify_auth";
 
-// artist name -> photo url (filled from top artists + now-playing lookups)
-const images = new Map();
-// Spotify lists images largest first; a middle size is plenty for a small photo
-const pickImage = (arr = []) => (arr[1] || arr[0])?.url || null;
-
 const b64url = (buf) =>
   btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
@@ -97,26 +92,14 @@ export const spotify = {
 
   logout: () => localStorage.removeItem(KEY),
 
-  imageFor: (name) => images.get(name) || null,
-
   async getNowPlaying() {
     const data = await api("/me/player/currently-playing");
     if (!data?.item || data.currently_playing_type !== "track") return null;
-    const artist = data.item.artists[0];
-    let image = images.get(artist.name);
-    if (!image) {
-      try { image = pickImage((await api(`/artists/${artist.id}`))?.images); } catch { /* fall back to album art */ }
-      if (image) images.set(artist.name, image);
-    }
-    const albumArt = pickImage(data.item.album?.images);
-    const { name: albumName, release_date } = data.item.album || {};
-    const album = albumName ? `${albumName}${release_date ? ` · ${release_date.slice(0, 4)}` : ""}` : "";
-    return { artist: artist.name, track: data.item.name, image: image || albumArt, albumArt, album };
+    return { artist: data.item.artists[0].name, track: data.item.name };
   },
 
   async getTopArtists() {
     const data = await api("/me/top/artists?limit=30&time_range=medium_term");
-    data.items.forEach((a) => { const img = pickImage(a.images); if (img) images.set(a.name, img); });
     return data.items.map((a) => a.name);
   },
 };
