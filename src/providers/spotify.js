@@ -30,7 +30,11 @@ async function tokenRequest(params) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: SPOTIFY_CLIENT_ID, ...params }),
   });
-  if (!res.ok) throw new Error("Spotify sign-in failed. Try connecting again.");
+  if (!res.ok) {
+    // Show Spotify's actual reason (e.g. invalid_grant, invalid_client) so it's easy to debug
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Spotify sign-in failed: ${err.error_description || err.error || res.status}. Click Connect to try again.`);
+  }
   return res.json();
 }
 
@@ -75,6 +79,7 @@ export const spotify = {
   async handleRedirect() {
     const code = new URLSearchParams(location.search).get("code");
     if (!code) return false;
+    history.replaceState({}, "", REDIRECT_URI); // codes are single-use: never let a refresh resend this one
     const token = await tokenRequest({
       grant_type: "authorization_code",
       code,
@@ -82,7 +87,6 @@ export const spotify = {
       code_verifier: sessionStorage.getItem("pkce_verifier"),
     });
     save(token);
-    history.replaceState({}, "", REDIRECT_URI);
     return true;
   },
 
