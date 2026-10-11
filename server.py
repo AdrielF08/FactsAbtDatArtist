@@ -3,12 +3,34 @@ Your API key stays on your machine (never sent to the browser).
 
 Run:  python server.py        (needs ANTHROPIC_API_KEY set; without it the app falls back to plain Wikipedia sentences)
 """
-import json, os, urllib.request, urllib.error
+import json, os, posixpath, time, urllib.request, urllib.error
+from collections import defaultdict, deque
+from urllib.parse import unquote
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 KEY = os.environ.get("ANTHROPIC_API_KEY")
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-haiku-5-5")
-PORT = 5173
+# Hosting platforms set PORT; locally we stay on 127.0.0.1:5173
+PORT = int(os.environ.get("PORT", 5173))
+HOST = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+
+# Protect your API bill when the site is public: max Claude requests per visitor / overall, per hour
+PER_IP_LIMIT = int(os.environ.get("PER_IP_LIMIT", 40))
+GLOBAL_LIMIT = int(os.environ.get("GLOBAL_LIMIT", 400))
+hits = defaultdict(deque)
+all_hits = deque()
+
+
+def rate_limited(ip):
+    now = time.time()
+    for q in (hits[ip], all_hits):
+        while q and now - q[0] > 3600:
+            q.popleft()
+    if len(hits[ip]) >= PER_IP_LIMIT or len(all_hits) >= GLOBAL_LIMIT:
+        return True
+    hits[ip].append(now)
+    all_hits.append(now)
+    return False
 
 PROMPT = """Below is Wikipedia text that should be about the music artist "{artist}".
 
@@ -28,6 +50,21 @@ TEXT:
 
 
 class Handler(SimpleHTTPRequestHandler):
+    # Only the web app's own files are public (never server.py or .env)
+    def allowed(self):
+        p = posixpath.normpath(unquote(self.path.split("?")[0]))
+        return p in ("/", "/index.html", "/styles.css") or p.startswith("/src/")
+
+    def do_GET(self):
+        if not self.allowed():
+            return self.send_error(404)
+        super().do_GET()
+
+    def do_HEAD(self):
+        if not self.allowed():
+            return self.send_error(404)
+        super().do_HEAD()
+
     def reply(self, status, obj):
         data = json.dumps(obj).encode()
         self.send_response(status)
@@ -45,6 +82,9 @@ class Handler(SimpleHTTPRequestHandler):
             return self.send_error(404)
         if not KEY:
             return self.reply(503, {"error": "ANTHROPIC_API_KEY is not set"})
+        ip = self.headers.get("X-Forwarded-For", self.client_address[0]).split(",")[0].strip()
+        if rate_limited(ip):
+            return self.reply(429, {"error": "Too many requests, try again later"})
         try:
             body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))))
             avoid = json.dumps(body.get("avoid", [])[:30])
@@ -71,5 +111,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Serving on http://127.0.0.1:{PORT}/  |  Claude facts: {'ON (' + MODEL + ')' if KEY else 'OFF (set ANTHROPIC_API_KEY)'}")
-    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+    print(f"Serving on http://{HOST}:{PORT}/  |  Claude facts: {'ON (' + MODEL + ')' if KEY else 'OFF (set ANTHROPIC_API_KEY)'}")
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
